@@ -18,6 +18,7 @@ void DenseCRFLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
 
   DenseCRFParameter dense_crf_param = this->layer_param_.dense_crf_param();
   max_iter_ = dense_crf_param.max_iter();
+
   for (int i = 0; i < dense_crf_param.pos_w_size(); ++i) {
     pos_w_.push_back(dense_crf_param.pos_w(i));
   }
@@ -60,6 +61,8 @@ void DenseCRFLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   current_ = NULL;
   next_    = NULL;
   tmp_     = NULL;  
+
+  output_prob_ = dense_crf_param.output_probability();
 }
 
 template <typename Dtype>
@@ -108,7 +111,7 @@ void DenseCRFLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   for (int i = 0; i < sum_multiplier_.count(); ++i) {
     multiplier_data[i] = 1.;
   }
-  scale_.Reshape(1, 1, pad_height_, pad_width_);
+  //scale_.Reshape(1, 1, pad_height_, pad_width_);
   norm_data_.Reshape(1, M_, pad_height_, pad_width_);
 }
 
@@ -285,14 +288,27 @@ void DenseCRFLayer<Dtype>::ComputeMap(Dtype* top_inf) {
   int out_index;
 
   // copy current_ to top
-  for (int h = 0; h < H_; ++h) {
-    for (int w = 0; w < W_; ++w) {      
-      for (int c = 0; c < M_; ++c) {
-	in_index  = (h * W_ + w) * M_ + c;
-	out_index = (c * pad_height_ + h) * pad_width_ + w;
-	top_inf[out_index] = static_cast<Dtype>(current_[in_index]);
-      }
-    } 
+  if (output_prob_) {
+    for (int h = 0; h < H_; ++h) {
+      for (int w = 0; w < W_; ++w) {      
+	for (int c = 0; c < M_; ++c) {
+	  in_index  = (h * W_ + w) * M_ + c;
+	  out_index = (c * pad_height_ + h) * pad_width_ + w;
+	  top_inf[out_index] = static_cast<Dtype>(current_[in_index]);
+	}
+      } 
+    }
+  } else {
+    for (int h = 0; h < H_; ++h) {
+      for (int w = 0; w < W_; ++w) {      
+	for (int c = 0; c < M_; ++c) {
+	  in_index  = (h * W_ + w) * M_ + c;
+	  out_index = (c * pad_height_ + h) * pad_width_ + w;
+	  top_inf[out_index] = log(
+  	     std::max(static_cast<Dtype>(current_[in_index]), Dtype(FLT_MIN)));
+	}
+      } 
+    }
   }
 }
 
@@ -345,55 +361,15 @@ void DenseCRFLayer<Dtype>::SetupPairwiseFunctions(const vector<Blob<Dtype>*>& bo
 
 template <typename Dtype>
 void DenseCRFLayer<Dtype>::SetupUnaryEnergy(const Dtype* bottom_data) {
-  // take exp and then -log
-  Dtype* scale_data = scale_.mutable_cpu_data();
-  Dtype* norm_data  = norm_data_.mutable_cpu_data();
-  int spatial_dim   = pad_height_ * pad_width_;
-
-  // norm_data is the normalized result of bottom_data
-  caffe_copy(spatial_dim * M_, bottom_data, norm_data);
-  // initialize scale_data to the first plane
-  caffe_copy(spatial_dim, bottom_data, scale_data);
-
-  // subtract the max to avoid numerical issues, compute the exp,
-  // and then normalize.
-
-  // get max
-  for (int j = 1; j < M_; ++j) {
-    for (int k = 0; k < spatial_dim; ++k) {
-      scale_data[k] = std::max(scale_data[k],
-			       bottom_data[j * spatial_dim + k]);
-    }
-  }
-
-  // subtraction
-  caffe_cpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, M_, spatial_dim, 
-			1, -1., sum_multiplier_.cpu_data(), scale_data, 1., norm_data);
-
-  // exponentiation
-  caffe_exp<Dtype>(spatial_dim * M_, norm_data, norm_data);
-
-  // sum after exp
-  caffe_cpu_gemv<Dtype>(CblasTrans, M_, spatial_dim, 1., norm_data, 
-			sum_multiplier_.cpu_data(), 0., scale_data);
-
-  // division
-  for (int j = 0; j < M_; ++j) {
-    caffe_div(spatial_dim, norm_data + j * spatial_dim, scale_data, 
-	      norm_data + j * spatial_dim);
-  }
-
-  // crop the effective size to unary_ and take -log
   for (int c = 0; c < M_; ++c) {
     for (int h = 0; h < H_; ++h) {
       for (int w = 0; w < W_; ++w) {
 	int in_index  = (c * pad_height_ + h) * pad_width_ + w;
 	int out_index = (h * W_ + w) * M_ + c;
-	unary_[out_index] = -log(norm_data[in_index]);
+	unary_[out_index] = -bottom_data[in_index];
       }
     }
   }
-  
 }
  
 INSTANTIATE_CLASS(DenseCRFLayer);

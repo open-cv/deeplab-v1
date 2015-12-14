@@ -847,6 +847,8 @@ class DenseCRFLayer : public Layer<Dtype> {
   /// norm_data is an intermediate Blob to hold temporary results.
   Blob<Dtype> norm_data_;
 
+  // the output format is probability or score (score = log(probability))
+  bool output_prob_;
 };
 
 
