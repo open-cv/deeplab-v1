@@ -24,6 +24,8 @@ void BiasChannelLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 void BiasChannelLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
+  const BiasChannelParameter_LabelType label_type =
+    this->layer_param_.bias_channel_param().label_type();
   num_ = bottom[0]->num();
   channels_ = bottom[0]->channels();
   height_ = bottom[0]->height();
@@ -32,8 +34,19 @@ void BiasChannelLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
   CHECK_EQ(bottom[1]->num(), num_) << "Input channels incompatible in num";
   max_labels_ = bottom[1]->channels();
   CHECK_GE(max_labels_, 1) << "Label blob needs to be non-empty";
-  CHECK_EQ(bottom[1]->height(), 1) << "Label height";
-  CHECK_EQ(bottom[1]->width(), 1) << "Label width";
+  switch (label_type) {
+  case BiasChannelParameter_LabelType_IMAGE:
+    CHECK_EQ(bottom[1]->height(), 1) << "Label height";
+    CHECK_EQ(bottom[1]->width(), 1) << "Label width";
+    break;
+  case BiasChannelParameter_LabelType_PIXEL:
+    CHECK_EQ(bottom[1]->channels(), 1) << "Label channels";
+    CHECK_EQ(bottom[1]->height(), height_) << "Label height";
+    CHECK_EQ(bottom[1]->width(), width_) << "Label width";
+    break;
+  default:
+    LOG(FATAL) << "Unexpected label type";
+  }
   //
   top[0]->Reshape(num_, channels_, height_, width_);
 }
@@ -41,18 +54,41 @@ void BiasChannelLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 void BiasChannelLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
+  const BiasChannelParameter_LabelType label_type =
+    this->layer_param_.bias_channel_param().label_type();
   caffe_copy(bottom[0]->count(), bottom[0]->cpu_data(), top[0]->mutable_cpu_data());
   for (int n = 0; n < num_; ++n) {
-    for (int j = 0; j < max_labels_; ++j) {
-      const int label = static_cast<int>(*bottom[1]->cpu_data(n, j));
-      if (ignore_label_.count(label) != 0) {
-	continue;
-      } else if (label >= 0 && label < channels_) {
-	// Bias the foreground or background scores
-	const Dtype bias = (label == 0) ? bg_bias_ : fg_bias_;
-	caffe_add_scalar(height_ * width_, bias, top[0]->mutable_cpu_data(n, label));	
-      } else {
-	LOG(FATAL) << "Unexpected label " << label;
+    if (label_type == BiasChannelParameter_LabelType_IMAGE) {
+      for (int j = 0; j < max_labels_; ++j) {
+	const int label = static_cast<int>(*bottom[1]->cpu_data(n, j));
+	if (ignore_label_.count(label) != 0) {
+	  continue;
+	} else if (label >= 0 && label < channels_) {
+	  // Bias the foreground or background scores
+	  const Dtype bias = (label == 0) ? bg_bias_ : fg_bias_;
+	  caffe_add_scalar(height_ * width_, bias, top[0]->mutable_cpu_data(n, label));	
+	} else {
+	  LOG(FATAL) << "Unexpected label " << label;
+	}
+      }
+    }
+    else if (label_type == BiasChannelParameter_LabelType_PIXEL) {
+      const Dtype *label_data = bottom[1]->cpu_data(n);
+      Dtype *top_data = top[0]->mutable_cpu_data(n);
+      const int spatial_dim = height_ * width_;
+      for (int j = 0; j < spatial_dim; ++j) {
+	const int label = static_cast<int>(label_data[j]);
+	if (ignore_label_.count(label) != 0) {
+	  continue;
+	} else if (label == 0) {
+	  top_data[j] += bg_bias_;
+	} else if (label > 0 && label < channels_) {
+	  // Bias the foreground and background scores
+	  top_data[j] += bg_bias_;
+	  top_data[label * spatial_dim + j] += fg_bias_;
+	} else {
+	  LOG(FATAL) << "Unexpected label " << label;
+	}
       }
     }
   }
@@ -73,6 +109,13 @@ void BiasChannelLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
 template <typename Dtype>
 void BiasChannelLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
+  // TODO(gpapan): write a CUDA kernel for this case
+  const BiasChannelParameter_LabelType label_type =
+    this->layer_param_.bias_channel_param().label_type();
+  if (label_type == BiasChannelParameter_LabelType_PIXEL) {
+    Forward_cpu(bottom, top);
+    return;
+  }
   caffe_copy(bottom[0]->count(), bottom[0]->gpu_data(), top[0]->mutable_gpu_data());
   for (int n = 0; n < num_; ++n) {
     for (int j = 0; j < max_labels_; ++j) {

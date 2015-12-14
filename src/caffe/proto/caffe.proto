@@ -432,6 +432,8 @@ message DenseCRFParameter {
   repeated float bi_xy_std = 4;
   repeated float bi_rgb_std = 5;
   repeated float bi_w = 6; 
+  // output is probability or score (score = log(prob))
+  optional bool output_probability = 7 [default = true];
 }
 
 // end jay
@@ -467,6 +469,11 @@ message BiasChannelParameter {
   optional float fg_bias = 2 [default = 2.];
   // will ignore labels with this value when adding bias
   repeated int32 ignore_label = 3;
+  enum LabelType {
+    IMAGE = 1;
+    PIXEL = 2;
+  }
+  optional LabelType label_type = 4 [default = IMAGE];
 }
 
 // Message that stores parameters used by CensorLabelLayer
