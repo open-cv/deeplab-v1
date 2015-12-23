@@ -411,6 +411,7 @@ message SegAccuracyParameter {
   optional AccuracyMetric metric = 1 [default = PixelAccuracy];
   // will ignore pixels with this value when computing accuracy
   repeated int32 ignore_label = 2;
+  optional bool reset = 3 [default = true];
 }
 
 // Message that stores parametres used by SoftmaxWithLossLayer

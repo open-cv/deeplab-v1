@@ -56,8 +56,10 @@ void SegAccuracyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 
   int top_k = 1;  // only support for top_k = 1
 
-  // remove old predictions if exists
-  confusion_matrix_.clear();  
+  // remove old predictions if reset() flag is true
+  if (this->layer_param_.seg_accuracy_param().reset()) {
+    confusion_matrix_.clear();
+  }
 
   for (int i = 0; i < num; ++i) {
     for (int h = 0; h < height; ++h) {
@@ -85,8 +87,9 @@ void SegAccuracyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
 	  // current position is not "255", indicating ambiguous position
 	  confusion_matrix_.accumulate(gt_label, bottom_data_vector[0].second);
 	} else {
-	  LOG(FATAL) << "Unexpected label " << gt_label;
-	}
+	  LOG(FATAL) << "Unexpected label " << gt_label << ". num: " << i 
+              << ". row: " << h << ". col: " << w;
+      }
       }
     }
     bottom_data  += bottom[0]->offset(1);
