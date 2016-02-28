@@ -46,11 +46,11 @@ The best model among the released ones yields 73.6% on PASCAL VOC 2012 test set.
 
 ### Experimental set-up
 
-1. The scripts we used for our experiments:
-    1. [run_pascal.sh](http://www.cs.ucla.edu/~lcchen/deeplab-public/run_pascal.sh): the script for training/testing on the PASCAL VOC 2012 dataset. __Note__ You also need to download this [file](http://www.cs.ucla.edu/~lcchen/deeplab-public/sub.sed)
-    2. [run_densecrf.sh](http://www.cs.ucla.edu/~lcchen/deeplab-public/run_densecrf.sh) and [run_densecrf_grid_search.sh](http://www.cs.ucla.edu/~lcchen/deeplab-public/run_densecrf_grid_search.sh): the scripts we used for post-processing the DCNN computed results by DenseCRF.
-2. The image list files used in our experiments:
-    * The [list folder](http://www.cs.ucla.edu/~lcchen/deeplab-public/list) stores the list files for the PASCAL VOC 2012 dataset. You can download the zipped file [here](http://www.cs.ucla.edu/~lcchen/deeplab-public/list.zip) (i.e., all the lists).
+1. The scripts we used for our experiments can be downloaded from this [link](https://ucla.box.com/s/4grlj8yoodv95936uybukjh5m0tdzvrf):
+    1. run_pascal.sh: the script for training/testing on the PASCAL VOC 2012 dataset. __Note__ You also need to download sub.sed script.
+    2. run_densecrf.sh and run_densecrf_grid_search.sh: the scripts we used for post-processing the DCNN computed results by DenseCRF.
+2. The image list files used in our experiments can be downloaded from this [link](https://ucla.box.com/s/rd9z2xvwsfpksi7mi08i2xqrj7ab4keb):
+    * The zip file stores the list files for the PASCAL VOC 2012 dataset.
 3. To use the mat_read_layer and mat_write_layer, please download and install [matio](http://sourceforge.net/projects/matio/files/matio/1.5.2/).
 
 ### FAQ
