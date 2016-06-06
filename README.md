@@ -1,4 +1,15 @@
-## DeepLab
+## DeepLab v2
+
+### New release
+
+DeepLab v2 has been released recently (see [this](https://bitbucket.org/aquariusjay/deeplab-public-ver2)), which attains 79.7% on the challenging PASCAL VOC 2012 image segmentation task.
+
+DeepLab v2 also incorportates all the layers from our DeepLab v1 (this repository).
+
+Please also see our project [website](http://liangchiehchen.com/projects/DeepLab.html) for details.
+
+=================================================================================
+## DeepLab v1 (this repository)
 
 ### Introduction
 
