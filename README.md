@@ -4,7 +4,7 @@
 
 DeepLab v2 has been released recently (see [this](https://bitbucket.org/aquariusjay/deeplab-public-ver2)), which attains 79.7% on the challenging PASCAL VOC 2012 image segmentation task.
 
-DeepLab v2 also incorportates all the layers from our DeepLab v1 (this repository).
+DeepLab v2 also incorportates some of the key layers from our DeepLab v1 (this repository). Note that there are still some minor differences between argmax and softmax_loss layers for DeepLabv1 and v2. If you want to reproduce our ICCV'15 results, please refer to the implementation of DeepLabv1.
 
 Please also see our project [website](http://liangchiehchen.com/projects/DeepLab.html) for details.
 
