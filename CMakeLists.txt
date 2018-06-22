@@ -8,6 +8,7 @@ option(BUILD_PYTHON "Build Python wrapper" OFF)
 option(BUILD_MATLAB "Build Matlab wrapper" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_SHARED_LIBS "Build SHARED libs if ON and STATIC otherwise" ON)
+option(BUILD_TEST "Build test" OFF)
 
 if(NOT BLAS)
     set(BLAS atlas)
@@ -140,7 +141,9 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 ###    Subdirectories    ##########################################################################
 
-add_subdirectory(src/gtest)
+if(BUILD_TEST)
+    add_subdirectory(src/gtest)
+endif()
 add_subdirectory(src/caffe)
 add_subdirectory(tools)
 

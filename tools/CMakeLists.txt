@@ -16,5 +16,5 @@ foreach(source ${TOOLS_SOURCES})
     install(TARGETS ${name}.bin DESTINATION tools)
 
 
-endforeach(source)
+endforeach()
 
