@@ -176,6 +176,8 @@ add_custom_target(
 
 #    Install Includes
 file(GLOB folders ${${PROJECT_NAME}_INCLUDE_DIRS}/*)
-install(DIRECTORY ${folders} DESTINATION include)
+install(DIRECTORY ${folders} DESTINATION include
+        PATTERN "test" EXCLUDE
+        )
 
 
