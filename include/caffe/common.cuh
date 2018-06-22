@@ -3,6 +3,10 @@
 #ifndef CAFFE_COMMON_CUH_
 #define CAFFE_COMMON_CUH_
 
+#if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
+ // skip it for cuda 8.0
+#else
+
 #include <cuda.h>
 
 // CUDA: atomicAdd is not defined for doubles
@@ -17,5 +21,6 @@ static __inline__ __device__ double atomicAdd(double *address, double val) {
   } while (assumed != old);
   return __longlong_as_double(old);
 }
+#endif  // !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 600
 
-#endif
+#endif  // CAFFE_COMMON_CUH_
