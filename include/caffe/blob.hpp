@@ -106,8 +106,10 @@ class Blob {
   void FromProto(const BlobProto& proto);
   void ToProto(BlobProto* proto, bool write_diff = false) const;
 
+#ifdef BUILD_MATLAB
   void FromMat(const char *fname);
   void ToMat(const char *fname, bool write_diff = false);
+#endif
 
   /// @brief Compute the sum of absolute values (L1 norm) of the data.
   Dtype asum_data() const;

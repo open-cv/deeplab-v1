@@ -8,7 +8,9 @@
 #include "caffe/syncedmem.hpp"
 #include "caffe/util/math_functions.hpp"
 
+#ifdef BUILD_MATLAB
 #include "matio.h"
+#endif
 
 namespace caffe {
 
@@ -314,6 +316,8 @@ void Blob<Dtype>::WriteToBinaryFile(std::string& fn) {
 }
 // end jay
 
+#ifdef BUILD_MATLAB
+
 template <typename Dtype> enum matio_types matio_type_map();
 template <> enum matio_types matio_type_map<float>() { return MAT_T_SINGLE; }
 template <> enum matio_types matio_type_map<double>() { return MAT_T_DOUBLE; }
@@ -390,6 +394,7 @@ void Blob<Dtype>::ToMat(const char *fname, bool write_diff) {
   }
   Mat_Close(matfp);
 }
+#endif  // BUILD_MATLAB
 
 INSTANTIATE_CLASS(Blob);
 template class Blob<int>;

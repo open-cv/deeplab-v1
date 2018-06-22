@@ -529,6 +529,8 @@ class PaddingLayer : public Layer<Dtype> {
   int height_out_, width_out_;
 };
 
+#ifdef BUILD_MATLAB
+
 /*
   MatReadLayer
 */
@@ -588,6 +590,8 @@ class MatWriteLayer : public Layer<Dtype> {
   string prefix_;
   vector<string> fnames_;
 };
+
+#endif  // BUILD_MATLAB
 
 // Forward declare PoolingLayer and SplitLayer for use in LRNLayer.
 template <typename Dtype> class PoolingLayer;

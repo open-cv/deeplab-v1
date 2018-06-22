@@ -1,3 +1,5 @@
+#ifdef BUILD_MATLAB
+
 #include <vector>
 
 #include "caffe/common.hpp"
@@ -87,3 +89,5 @@ INSTANTIATE_CLASS(MatReadLayer);
 REGISTER_LAYER_CLASS(MAT_READ, MatReadLayer);
 
 }  // namespace caffe
+
+#endif  // BUILD_MATLAB

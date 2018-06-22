@@ -1,3 +1,5 @@
+#ifdef BUILD_MATLAB
+
 #include <vector>
 
 #include "caffe/common.hpp"
@@ -71,3 +73,5 @@ INSTANTIATE_CLASS(MatWriteLayer);
 REGISTER_LAYER_CLASS(MAT_WRITE, MatWriteLayer);
 
 }  // namespace caffe
+
+#endif  // BUILD_MATLAB
