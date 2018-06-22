@@ -18,7 +18,8 @@ PROTOBUF_GENERATE_PYTHON(ProtoSourcesPy ${ProtoFiles})
 
 add_custom_target(protoPy ALL DEPENDS ${ProtoSourcesPy})
 
-add_library(proto
+# make it static, so that we only need to link to libcaffe.so
+add_library(proto STATIC
         ${ProtoSources}
         ${ProtoHeaders}
         )

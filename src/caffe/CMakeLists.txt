@@ -43,7 +43,7 @@ target_link_libraries(caffe proto
 )
 
 #set output directory
-set_target_properties(caffe PROPERTIES
+set_target_properties(caffe caffe_cu PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
@@ -54,4 +54,4 @@ endif()
 
 ###    Install    #################################################################################
 
-install(TARGETS caffe DESTINATION lib)
+install(TARGETS caffe caffe_cu DESTINATION lib)
