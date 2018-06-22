@@ -16,7 +16,7 @@ file(GLOB ProtoFiles "${CMAKE_CURRENT_SOURCE_DIR}/*.proto")
 PROTOBUF_GENERATE_CPP(ProtoSources ProtoHeaders ${ProtoFiles})
 PROTOBUF_GENERATE_PYTHON(ProtoSourcesPy ${ProtoFiles})
 
-add_custom_target(protoPy DEPENDS ${ProtoSourcesPy})
+add_custom_target(protoPy ALL DEPENDS ${ProtoSourcesPy})
 
 add_library(proto
         ${ProtoSources}
